@@ -90,5 +90,8 @@ int main(int argc, char **argv) {
       printf("RGBCLI: Unknown mode\n");
       exit(EXIT_FAILURE);
   }
+
+  // close serial device
+  close(serial_descriptor);
 }
 
