@@ -19,6 +19,35 @@ int opt, mode_flag = 0;
 unsigned char r, g, b;
 char * device_name = NULL;
 
+// setup serial device
+void setup_serial_device(int serial_descriptor) {
+  // serial settings
+  struct termios serial_settings;
+
+  // read settings
+  if (tcgetattr(serial_descriptor, &serial_settings) != 0) {
+    close (serial_descriptor);
+    printf("RGBCLI: Cannot read flags from serial port descriptor.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // set serial flags
+  // 9600 baud, 8 data bits, 1 stop bit, no parity
+  serial_settings.c_cflag &= ~(PARENB | CSTOPB);
+  serial_settings.c_cflag |= (CS8 | CREAD | CLOCAL);
+  serial_settings.c_oflag &= ~(OPOST | ONLCR);
+
+  // set baud rate
+  cfsetospeed(&serial_settings, B9600);
+
+  // setup line settings
+  if (tcsetattr(serial_descriptor, TCSANOW, &serial_settings) != 0) {
+    close(serial_descriptor);
+    printf("RGBCLI: Cannot set flags on the serial port descriptor.\n");
+    exit(EXIT_FAILURE);
+  }
+}
+
 // main function
 int main(int argc, char **argv) {
   // parse commandline
@@ -63,6 +92,8 @@ int main(int argc, char **argv) {
   if ((serial_descriptor = open(device_name, O_WRONLY)) < 0) {
       printf("RGBCLI: Cannot Open %s for writing\n", device_name);
       exit(EXIT_FAILURE);
+  } else {
+    setup_serial_device(serial_descriptor);
   }
 
   // send payload to arduino controller

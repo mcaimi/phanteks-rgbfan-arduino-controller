@@ -10,6 +10,10 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdlib.h>
+#include <sys/file.h>
+#include <string.h>
+// for tty related ioctls
+#include <termios.h>
 
 // serial commands
 #define LIGHTS_OFF 0x00
