@@ -17,7 +17,7 @@ void (*effectTable[NUM_MODES])() = {
 // setup and run Arduino functions
 void setup() {
   // initialize serial line
-  Serial.begin(9600);
+  Serial.begin(SERIAL_SPEED, SERIAL_MODE);
   Serial.setTimeout(SERIAL_TIMEOUT);
 
   // clean rgb array
@@ -47,20 +47,23 @@ void serialEvent() {
           // set selected mode to lights off
           selected_mode = 0;
           saveMode(selected_mode, rgb);
+          Serial.write(OP_OK);
           break;
         case MODE_RANDOMCOLOR:
           // set selected mode to random colors
           selected_mode = 1;
           saveMode(selected_mode, rgb);
+          Serial.write(OP_OK);
           break;
         case MODE_STATICCOLOR: 
           // selects static color from input values
           selected_mode = 2;
           saveMode(selected_mode, rgb);
+          Serial.write(OP_OK);
           break;
         default:
           // no mode selected, or malformed message received
-          Serial.println("Malformed Message");
+          Serial.write(OP_KO);
           break;
       }
     }
@@ -70,10 +73,10 @@ void serialEvent() {
 void loop() {
   // act accordingly to selected lighting mode
   switch (selected_mode) {
-    case 0:
+    case MODE_LIGHTSOFF:
       lightsOff();
       break;
-     case 1:
+     case MODE_RANDOMCOLOR:
       // set led color according to current mode
       effectTable[current_color]();
       // update current mode
@@ -81,7 +84,7 @@ void loop() {
         current_color = random(MAX_RAND) % NUM_MODES;
       }
       break;
-     case 2:
+     case MODE_STATICCOLOR:
       // set specific color
       staticColor((uint8_t)rgb[1], (uint8_t)rgb[2], (uint8_t)rgb[3]);
       break;
