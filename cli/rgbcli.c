@@ -53,8 +53,11 @@ void setup_serial_device(int serial_descriptor) {
   // set serial flags
   // 9600 baud, 8 data bits, 1 stop bit, no parity
   serial_settings.c_cflag &= ~(PARENB | CSTOPB);
-  serial_settings.c_cflag |= (CS8 | CREAD | CLOCAL);
+  serial_settings.c_cflag |= (CS8 | CREAD | CLOCAL | CRTSCTS);
   serial_settings.c_oflag &= ~(OPOST | ONLCR);
+  serial_settings.c_iflag |= (IGNBRK);
+  serial_settings.c_cc[VMIN] = 1;
+  serial_settings.c_cc[VTIME] = 5;
 
   // set baud rate
   cfsetospeed(&serial_settings, B9600);
