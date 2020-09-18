@@ -12,22 +12,41 @@ static const payload randomcolor_payload = { .command = RANDOM_COLOR, .r = 0x00,
 // variable payload, rgb values can be set via CLI switches
 static payload staticcolor_payload = { .command = STATIC_COLOR, .r = 0x00, .g = 0x00, .b = 0x00 };
 
+// operation outcome
+int outcome = 0;
+
 // serial device file descriptor
 int serial_descriptor;
 // getopt related
 int opt, mode_flag = 0;
-unsigned char r, g, b;
+unsigned int r, g, b;
 char * device_name = NULL;
 
 // setup serial device
 void setup_serial_device(int serial_descriptor) {
   // serial settings
   struct termios serial_settings;
+  // descriptor settings
+  struct stat descriptor_stats;
+
+  // try to get exclusive access
+  if (flock(serial_descriptor, LOCK_EX|LOCK_NB) != 0) {
+    close(serial_descriptor);
+    printf("RGBCLI: Cannot acquire exclusive lock on device.\n");
+    exit(EXIT_FAILURE);
+  }
 
   // read settings
   if (tcgetattr(serial_descriptor, &serial_settings) != 0) {
     close (serial_descriptor);
     printf("RGBCLI: Cannot read flags from serial port descriptor.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // get file descriptor settings
+  if (fstat(serial_descriptor, &descriptor_stats) != 0) {
+    close(serial_descriptor);
+    printf("RGBCLI: fstat() failed on serial_descriptor.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -60,13 +79,13 @@ int main(int argc, char **argv) {
         device_name = optarg;
         break;
       case 'r':
-        r = (unsigned char)atoi(optarg);
+        r = atoi(optarg);
         break;
       case 'g':
-        g = (unsigned char)atoi(optarg);
+        g = atoi(optarg);
         break;
       case 'b':
-        b = (unsigned char)atoi(optarg);
+        b = atoi(optarg);
         break;
       default:
         printf("RGBCLI: Syntax Error.");
@@ -89,8 +108,8 @@ int main(int argc, char **argv) {
   }
 
   // open serial device
-  if ((serial_descriptor = open(device_name, O_WRONLY)) < 0) {
-      printf("RGBCLI: Cannot Open %s for writing\n", device_name);
+  if ((serial_descriptor = open(device_name, O_WRONLY|O_NOCTTY)) < 0) {
+      printf("RGBCLI: Cannot Open %s in RW mode.\n", device_name);
       exit(EXIT_FAILURE);
   } else {
     setup_serial_device(serial_descriptor);
@@ -101,28 +120,32 @@ int main(int argc, char **argv) {
     case LIGHTS_OFF:
       printf("RGBCLI: Using Device [%s], operating mode: LIGHTS_OFF...\n", device_name);
       write(serial_descriptor, lightsoff_payload._bytes, sizeof(lightsoff_payload._bytes));
-      exit(EXIT_SUCCESS);
+      outcome = 1;
       break;
     case RANDOM_COLOR:
       printf("RGBCLI: Using Device [%s], operating mode: RANDOM_COLOR...\n", device_name);
       write(serial_descriptor, randomcolor_payload._bytes, sizeof(randomcolor_payload._bytes));
-      exit(EXIT_SUCCESS);
+      outcome = 1;
       break;
     case STATIC_COLOR:
       printf("RGBCLI: Using Device [%s], operating mode: STATIC_COLOR (r:%d, g:%d, b:%d)...\n", device_name, r, g, b);
       staticcolor_payload.command = STATIC_COLOR;
-      staticcolor_payload.r = r;
-      staticcolor_payload.g = g;
-      staticcolor_payload.b = b;
+      staticcolor_payload.r = (unsigned char)r;
+      staticcolor_payload.g = (unsigned char)g;
+      staticcolor_payload.b = (unsigned char)b;
       write(serial_descriptor, staticcolor_payload._bytes, sizeof(staticcolor_payload._bytes));
-      exit(EXIT_SUCCESS);
+      outcome = 1;
       break;
     default:
       printf("RGBCLI: Unknown mode\n");
-      exit(EXIT_FAILURE);
   }
 
+  // unlock descriptor
+  flock(serial_descriptor, LOCK_UN);
   // close serial device
   close(serial_descriptor);
+  if (outcome == 0) {
+    exit(EXIT_FAILURE);
+  } else exit(EXIT_SUCCESS);
 }
 
