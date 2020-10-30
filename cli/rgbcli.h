@@ -19,6 +19,7 @@
 #define LIGHTS_OFF 0x00
 #define RANDOM_COLOR 0x01
 #define STATIC_COLOR 0x02
+#define BREATHE_COLOR 0x03
 
 // macros
 #define COMPONENT_OK(k) ((k >= 0) && (k <=255))

@@ -11,6 +11,7 @@ static const payload lightsoff_payload = { .command = LIGHTS_OFF, .r = 0x00, .g 
 static const payload randomcolor_payload = { .command = RANDOM_COLOR, .r = 0x00, .g = 0x00, .b = 0x00 };
 // variable payload, rgb values can be set via CLI switches
 static payload staticcolor_payload = { .command = STATIC_COLOR, .r = 0x00, .g = 0x00, .b = 0x00 };
+static payload breathe_payload = { .command = BREATHE_COLOR, .r = 0x00, .g = 0x00, .b = 0x00 };
 
 // operation outcome
 int outcome = 0;
@@ -137,6 +138,15 @@ int main(int argc, char **argv) {
       staticcolor_payload.g = (unsigned char)g;
       staticcolor_payload.b = (unsigned char)b;
       write(serial_descriptor, staticcolor_payload._bytes, sizeof(staticcolor_payload._bytes));
+      outcome = 1;
+      break;
+    case BREATHE_COLOR:
+      printf("RGBCLI: Using Device [%s], operating mode: BREATHE_COLOR (r:%d, g:%d, b:%d)...\n", device_name, r, g, b);
+      breathe_payload.command = BREATHE_COLOR;
+      breathe_payload.r = (unsigned char)r;
+      breathe_payload.g = (unsigned char)g;
+      breathe_payload.b = (unsigned char)b;
+      write(serial_descriptor, breathe_payload._bytes, sizeof(breathe_payload._bytes));
       outcome = 1;
       break;
     default:
