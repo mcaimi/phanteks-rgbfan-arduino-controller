@@ -43,6 +43,7 @@ void saveMode(uint8_t mode_setting, byte *settings) {
       EEPROM.update(MODE_ADDR, mode_setting);
       break;
     case MODE_STATICCOLOR:
+    case MODE_BREATHE:
       EEPROM.update(MODE_ADDR, mode_setting);
       EEPROM.update(R_ADDR, settings[1]);
       EEPROM.update(G_ADDR, settings[2]);
@@ -73,4 +74,10 @@ void staticColor(uint8_t r, uint8_t g, uint8_t b) {
 // shut lights off
 void lightsOff() {
   solidColor(0, 0, 0, &led_fan);
+}
+
+// breathe effect
+void breathe(uint8_t r, uint8_t g, uint8_t b, uint8_t intensity) {
+  staticColor(r, g, b);
+  led_fan.setBrightness(intensity);
 }

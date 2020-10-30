@@ -26,6 +26,10 @@ void setup() {
   // zero out current_color
   current_color = 0;
 
+  // breathe level starts at 0
+  breathe_intensity = 0;
+  breathe_direction = 0;
+
   // setup run mode
   setupMode(&selected_mode, rgb);
 
@@ -61,6 +65,12 @@ void serialEvent() {
           saveMode(selected_mode, rgb);
           Serial.write(OP_OK);
           break;
+        case MODE_BREATHE: 
+          // selects static color from input values
+          selected_mode = 3;
+          saveMode(selected_mode, rgb);
+          Serial.write(OP_OK);
+          break;
         default:
           // no mode selected, or malformed message received
           Serial.write(OP_KO);
@@ -87,6 +97,17 @@ void loop() {
      case MODE_STATICCOLOR:
       // set specific color
       staticColor((uint8_t)rgb[1], (uint8_t)rgb[2], (uint8_t)rgb[3]);
+      break;
+     case MODE_BREATHE:
+      // set specific color and update intensity
+      if (!BETWEEN(breathe_intensity)) breathe_direction ^= 1;
+      if (breathe_direction)
+        breathe_intensity++;
+      else
+        breathe_intensity--;
+      
+      breathe((uint8_t)rgb[1], (uint8_t)rgb[2], (uint8_t)rgb[3], (uint8_t)breathe_intensity);
+      delay(BREATHE_DELAY);
       break;
   }
 }

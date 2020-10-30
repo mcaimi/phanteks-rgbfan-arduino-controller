@@ -7,6 +7,9 @@
 #define DATA_PIN 6
 // program delay value, before changing effect function (5secs)
 #define DELAY 5000
+// breathe effect timings
+#define BREATHE_STEPS 255
+#define BREATHE_DELAY DELAY/BREATHE_STEPS
 // arduino max random value for random() function
 #define MAX_RAND 65535
 // eeprom addresses for settings
@@ -24,6 +27,7 @@
 #define MODE_LIGHTSOFF 0x00
 #define MODE_RANDOMCOLOR 0x01
 #define MODE_STATICCOLOR 0x02
+#define MODE_BREATHE 0x03
 
 // op return
 #define OP_OK 0x00

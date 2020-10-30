@@ -13,3 +13,6 @@ uint8_t current_color;
 // value read from serial
 const uint8_t msg_len = 4;
 static byte rgb[msg_len + 1];
+// breathe level
+static uint8_t breathe_intensity;
+static int breathe_direction;
