@@ -100,14 +100,16 @@ void loop() {
       break;
      case MODE_BREATHE:
       // set specific color and update intensity
-      if (!BETWEEN(breathe_intensity)) breathe_direction ^= 1;
-      if (breathe_direction)
-        breathe_intensity++;
-      else
-        breathe_intensity--;
-      
-      breathe((uint8_t)rgb[1], (uint8_t)rgb[2], (uint8_t)rgb[3], (uint8_t)breathe_intensity);
-      delay(BREATHE_DELAY);
+      if (!delayLoop(BREATHE_DELAY)) {
+        if (!BETWEEN(breathe_intensity)) breathe_direction ^= 1;
+        if (breathe_direction)
+          breathe_intensity++;
+        else
+          breathe_intensity--;
+  
+        // update mode
+        breathe((uint8_t)rgb[1], (uint8_t)rgb[2], (uint8_t)rgb[3], (uint8_t)breathe_intensity);
+      }
       break;
   }
 }

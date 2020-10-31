@@ -69,6 +69,7 @@ void brightBlue() {
 // static color
 void staticColor(uint8_t r, uint8_t g, uint8_t b) {
   solidColor(r, g, b, &led_fan);
+  if (led_fan.getBrightness() < 0xFF) led_fan.setBrightness(0xFF);
 }
 
 // shut lights off

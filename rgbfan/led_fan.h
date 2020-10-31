@@ -6,6 +6,7 @@ Adafruit_NeoPixel led_fan;
 // 0 - leds off
 // 1 - random cycle between default colors
 // 2 - set static color (saved in eeprom, controlled by external tool)
+// 3 - breathe effect, color is saved in eeprom
 uint8_t selected_mode;
 
 // current color in random mode
